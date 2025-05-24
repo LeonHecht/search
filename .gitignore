@@ -8,3 +8,5 @@ venv/
 .env
 
 data/uploads/*
+
+node_modules/
