@@ -11,7 +11,10 @@ class SearchRequest(BaseModel):
 
 class SearchResult(BaseModel):
     id: str
+    title: str
     score: float
+    snippet: str
+    download_url: str | None
 
 @router.get("/ping")
 def ping():

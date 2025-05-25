@@ -10,3 +10,5 @@ venv/
 data/uploads/*
 
 node_modules/
+
+data/static_corpus/files/*

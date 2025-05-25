@@ -23,32 +23,82 @@ export default function App() {
     }
   };
 
+  // Helper to highlight query terms in snippet
+  const renderSnippet = (snippet) => {
+    const terms = Array.from(new Set(
+      query.toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .split(/[^A-Za-z]+/)
+        .filter(Boolean)
+    ));
+    const words = snippet.split(' ');
+    return words.map((word, idx) => {
+      // strip accents
+      const ascii = word
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+      // then remove non-word chars and lower-case
+      const clean = ascii.replace(/[^A-Za-z]/g, '').toLowerCase();
+      if (terms.includes(clean)) {
+        return <strong key={idx} className="font-bold">{word} </strong>;
+      }
+      return <span key={idx}>{word} </span>;
+    });
+  };
+
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-xl bg-white p-6 rounded-2xl shadow-lg">
-        <h1 className="text-2xl font-bold mb-4 text-center">Legal Document Search</h1>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100">
+      <div className="w-full max-w-xl bg-gray-100 p-14 rounded-2xl shadow-lg">
+        <h1 className="text-2xl font-bold mb-4 text-center mb-7">Legal Document Search</h1>
         <div className="flex gap-2">
-          <input
-            type="text"
-            className="flex-grow p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter your search query..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          />
-          <button
-            onClick={handleSearch}
-            className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-            disabled={loading}
-          >
-            {loading ? 'Searching...' : 'Search'}
-          </button>
+          <div className={`input-wrapper flex-grow relative ${query ? 'caret-hidden' : ''}`}>
+            <input
+              type="text"
+              className="w-full py-3 px-4 border rounded-2xl focus:outline-none focus:placeholder-transparent hover:bg-gray-50 transition-colors"
+              placeholder="Enter your search query..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+          </div>
+            <button
+              onClick={handleSearch}
+              className="py-1 px-5 bg-gray-400 text-white rounded-3xl hover:bg-gray-300 disabled:opacity-50 transition-colors hover:shadow"
+              disabled={loading}
+            >
+              {loading ? 'Searching...' : 'Search'}
+            </button>
         </div>
         <ul className="mt-6 space-y-4">
           {results.map((res) => (
             <li key={res.id} className="p-4 border rounded-lg hover:shadow">
-              <p className="font-mono text-sm text-gray-600">ID: {res.id}</p>
-              <p>Score: {res.score.toFixed(3)}</p>
+              <h2 className="text-lg font-semibold">{res.title}</h2>
+              <div className="flex justify-between items-center mt-1">
+                <p className="font-mono text-xs text-gray-500">ID: {res.id}</p>
+                <span className="text-sm font-semibold">
+                  Score: {res.score.toFixed(3)}
+                </span>
+              </div>
+
+              {/* snippet around match */}
+              <p className="mt-2 text-gray-700 text-sm">
+                {renderSnippet(res.snippet)}
+                {res.snippet.split(' ').length >= 50 ? '…' : ''}
+              </p>
+
+              {/* download button, if available */}
+              {res.download_url && (
+                <a
+                  href={res.download_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-block mt-3 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                >
+                  Download Full Case
+                </a>
+              )}
             </li>
           ))}
         </ul>

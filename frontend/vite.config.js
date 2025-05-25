@@ -7,7 +7,8 @@ export default defineConfig({
     proxy: {
       // forward API calls to your FastAPI backend
       '/search': 'http://localhost:8000',
-      '/upload': 'http://localhost:8000'
+      '/upload': 'http://localhost:8000',
+      '/files':   'http://localhost:8000' 
     }
   }
 })
