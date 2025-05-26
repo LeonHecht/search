@@ -132,9 +132,10 @@ def bm25_search(query: str, top_k: int = 30) -> list[dict]:
         if file_url is None:
             print(f"Warning: No file found for document ID {doc['id']}")
 
+        title = doc.get("title") or ""
         results.append({
             "id": doc["id"],
-            "title": doc["title"],
+            "title": title,
             "score": float(scores[i]),
             "snippet": snippet,
             "download_url": file_url,

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Body
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from app.services.bm25 import bm25_search
 from app.config import ENABLE_TRANSFORMERS
 from app.services.transformer import transformer_search
@@ -13,10 +13,10 @@ class SearchRequest(BaseModel):
 
 class SearchResult(BaseModel):
     id: str
-    title: str
     score: float
-    snippet: str
-    download_url: str | None
+    title: str | None = Field(default=None)   # <- allow None
+    snippet: str | None = None
+    download_url: str | None = None
 
 @router.get("/ping")
 def ping():
