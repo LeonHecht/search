@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 export default function App() {
   const [query, setQuery] = useState('');
+  const [useTransformer, setUseTransformer] = useState(false);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -12,12 +13,22 @@ export default function App() {
       const resp = await fetch('/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, top_k: 30 }),
+        body: JSON.stringify({ query, top_k: 30, use_transformer: useTransformer }),
       });
+
+      if (!resp.ok) {
+        const err = await resp.json();
+        console.error('FastAPI validation error:', err);
+        alert(`Search failed: ${err.detail?.[0]?.msg || resp.statusText}`);
+        return;
+      }
+
       const data = await resp.json();
+      console.log('Search response:', data);
       setResults(data);
     } catch (err) {
       console.error(err);
+      alert('Unexpected error');
     } finally {
       setLoading(false);
     }
@@ -25,13 +36,16 @@ export default function App() {
 
   // Helper to highlight query terms in snippet
   const renderSnippet = (snippet) => {
-    const terms = Array.from(new Set(
-      query.toLowerCase()
+    const terms = Array.from(
+      new Set(
+      query
+        .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .split(/[^A-Za-z]+/)
         .filter(Boolean)
-    ));
+    )
+  );
     const words = snippet.split(' ');
     return words.map((word, idx) => {
       // strip accents
@@ -52,6 +66,21 @@ export default function App() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100">
       <div className="w-full max-w-xl bg-gray-100 p-14 rounded-2xl shadow-lg">
         <h1 className="text-2xl font-bold mb-4 text-center mb-7">Legal Document Search</h1>
+        {/* Toggle between BM25 (Exacta) and Transformer (Semantica) */}
+        <div className="flex justify-center mb-4">
+          <button
+            onClick={() => setUseTransformer(false)}
+            className={`px-4 py-2 rounded-l-2xl border ${!useTransformer ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+          >
+            Exacta
+          </button>
+          <button
+            onClick={() => setUseTransformer(true)}
+            className={`px-4 py-2 rounded-r-2xl border ${useTransformer ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+          >
+            Semántica
+          </button>
+        </div>
         <div className="flex gap-2">
           <div className={`input-wrapper flex-grow relative ${query ? 'caret-hidden' : ''}`}>
             <input
