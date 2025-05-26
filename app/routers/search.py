@@ -29,10 +29,7 @@ def search_endpoint(req: SearchRequest = Body(..., description="Your search para
         raise HTTPException(status_code=400, detail="Query must not be empty")
 
     if req.use_transformer:
-        # transformer returns only id & score
-        hits = transformer_search(req.query, top_k=req.top_k)
-        # map to SearchResult (no snippet/download for now)
-        return [SearchResult(**hit) for hit in hits]
+        return transformer_search(req.query, top_k=req.top_k)
     else:
         # existing BM25 search returns full results
         return bm25_search(req.query, top_k=req.top_k)
