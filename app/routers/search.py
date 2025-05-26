@@ -1,13 +1,15 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Body
 from pydantic import BaseModel
 from app.services.bm25 import bm25_search
 from app.config import ENABLE_TRANSFORMERS
+from app.services.transformer import transformer_search
 
 router = APIRouter()
 
 class SearchRequest(BaseModel):
     query: str
     top_k: int = 30
+    use_transformer: bool = False
 
 class SearchResult(BaseModel):
     id: str
@@ -20,11 +22,17 @@ class SearchResult(BaseModel):
 def ping():
     return {"message": "pong"}
 
-@router.post("/search", response_model=list[SearchResult])
-def search_endpoint(req: SearchRequest):
-    # TODO: wire BM25 or transformer search
-    if not req.query:
+@router.post("/search", response_model=list[SearchResult], summary="Run a BM25 or transformer search")
+
+def search_endpoint(req: SearchRequest = Body(..., description="Your search parameters")) -> list[SearchResult]:
+    if not req.query.strip():
         raise HTTPException(status_code=400, detail="Query must not be empty")
-    
-    results = bm25_search(req.query, top_k=req.top_k)
-    return results
+
+    if req.use_transformer:
+        # transformer returns only id & score
+        hits = transformer_search(req.query, top_k=req.top_k)
+        # map to SearchResult (no snippet/download for now)
+        return [SearchResult(**hit) for hit in hits]
+    else:
+        # existing BM25 search returns full results
+        return bm25_search(req.query, top_k=req.top_k)

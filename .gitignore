@@ -16,3 +16,7 @@ data/static_corpus/files/*
 
 frontend/node_modules/
 frontend/dist/
+
+.cache/
+
+.cache
