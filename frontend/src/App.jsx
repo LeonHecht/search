@@ -27,8 +27,10 @@ export default function App() {
       console.log('Search response:', data);
       setResults(data);
     } catch (err) {
-      console.error(err);
-      alert('Unexpected error');
+      console.error('Fetch failed:', err);
+      const text = await err.response?.text().catch(()=>'');
+      console.error('Response body:', text);
+      alert(`Search failed: ${err.message}`);
     } finally {
       setLoading(false);
     }
