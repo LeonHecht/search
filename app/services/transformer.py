@@ -30,7 +30,7 @@ def load_transformer_corpus():
     with _lock:
         # Initialize model once
         if _MODEL is None:
-            _MODEL = BGEM3FlagModel('BAAI/bge-m3', use_cpu=True, use_fp16=True)
+            _MODEL = BGEM3FlagModel('BAAI/bge-m3', use_fp16=True)
 
         # Load documents
         _CORPUS_TEXTS.clear()
