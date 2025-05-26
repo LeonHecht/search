@@ -12,7 +12,7 @@ export default function App() {
       const resp = await fetch('/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, top_k: 10 }),
+        body: JSON.stringify({ query, top_k: 30 }),
       });
       const data = await resp.json();
       setResults(data);
@@ -65,7 +65,7 @@ export default function App() {
           </div>
             <button
               onClick={handleSearch}
-              className="py-1 px-5 bg-gray-400 text-white rounded-3xl hover:bg-gray-300 disabled:opacity-50 transition-colors hover:shadow"
+              className="py-1 px-5 bg-slate-600 rounded-3xl hover:bg-slate-500 disabled:opacity-50 transition-colors hover:shadow text-white"
               disabled={loading}
             >
               {loading ? 'Searching...' : 'Search'}
@@ -94,7 +94,7 @@ export default function App() {
                   href={res.download_url}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-block mt-3 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                  className="inline-block mt-3 px-4 py-2 bg-slate-600 text-white rounded hover:bg-slate-500 text-sm"
                 >
                   Download Full Case
                 </a>
