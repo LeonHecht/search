@@ -7,7 +7,7 @@ router = APIRouter()
 
 class SearchRequest(BaseModel):
     query: str
-    top_k: int = 10
+    top_k: int = 30
 
 class SearchResult(BaseModel):
     id: str

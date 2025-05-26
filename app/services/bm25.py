@@ -33,6 +33,7 @@ def normalize_token(tok: str) -> str:
 
 def load_corpus():
     """Load documents from CORPUS_PATH into BM25 index."""
+    print("Loading corpus and initializing BM25 index...")
     global _CORPUS, _TOKENIZED, _BM25
     with _lock:
         _CORPUS.clear()
@@ -46,13 +47,18 @@ def load_corpus():
                         obj = json.loads(line)
                     except json.JSONDecodeError:
                         continue
+                    
                     doc_id = obj.get("id")
+                    
                     title = obj.get("title", "")
+                    
                     text = obj.get("text", "")
+                    
                     content = f"{title} {text}".strip()
-                    tokens = content.split()
+                    tokens_norm = [normalize_token(w) for w in content.split()]
+
                     _CORPUS.append({"id": doc_id, "title": title, "text": content})
-                    _TOKENIZED.append(tokens)
+                    _TOKENIZED.append(tokens_norm)
         else:
             # Load .txt files in directory
             dir_path = Path(CORPUS_PATH)
@@ -66,9 +72,10 @@ def load_corpus():
             _BM25 = BM25Okapi(_TOKENIZED)
         else:
             _BM25 = None
+        print("Done loading corpus and initializing BM25 index.")
 
 
-def bm25_search(query: str, top_k: int = 10) -> list[dict]:
+def bm25_search(query: str, top_k: int = 30) -> list[dict]:
     """
     Perform BM25 search over the loaded corpus.
 
@@ -88,10 +95,14 @@ def bm25_search(query: str, top_k: int = 10) -> list[dict]:
     if _BM25 is None:
         return []
     
-
-    tokenized_query = query.split()
+    tokenized_query = [normalize_token(t) for t in query.split() if t]
+    if not tokenized_query:
+        print("Empty query after normalization, returning empty results.")
+        return []
+    print(f"Searching for query: {tokenized_query}")
     scores = _BM25.get_scores(tokenized_query)
-    top_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:top_k]
+    top_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)
+    top_indices = [i for i in top_indices if scores[i] > 0][:top_k]
     
     results = []
     for i in top_indices:
@@ -99,25 +110,27 @@ def bm25_search(query: str, top_k: int = 10) -> list[dict]:
         text = doc["text"]
 
         # find first exact match of any query term and take 50-word window
-        terms = set(normalize_token(t) for t in query.split())
-        original_tokens = text.split()
-        tokens_norm = [normalize_token(tok) for tok in original_tokens]
-        idx = next((i for i, w in enumerate(tokens_norm) if w.lower() in terms), 0)
-        snippet_tokens = original_tokens[idx - 25 : idx + 25]
-        snippet = " ".join(snippet_tokens)
-
+        snippet = ""
+        doc_tokens = text.split()
+        for idx, orig_tok in enumerate(doc_tokens):
+            if normalize_token(orig_tok) in tokenized_query:
+                start = max(idx - 25, 0)
+                snippet_tokens = doc_tokens[start : start + 50]
+                snippet = " ".join(snippet_tokens)
+                break
+        
+        if snippet == "":
+            print(f"Warning: No snippet found for document ID {doc['id']}")
+            
         # detect the actual file extension (pdf, html, docx, etc.)
         file_url = None
         for ext in (".pdf", ".PDF", ".htm", ".html", ".HTML", ".docx", ".doc", ".txt"):
             candidate = Path(CORPUS_PATH) / "files" / f"{doc['id']}{ext}"
-            print(f"Checking for file: {candidate}")
             if candidate.exists():
                 file_url = f"/files/{candidate.name}"
                 break
         if file_url is None:
             print(f"Warning: No file found for document ID {doc['id']}")
-        else:
-            print(f"Found file for {doc['id']}: {file_url}")
 
         results.append({
             "id": doc["id"],
