@@ -30,7 +30,7 @@ def search_endpoint(req: SearchRequest = Body(..., description="Your search para
     if not req.query.strip():
         raise HTTPException(status_code=400, detail="Query must not be empty")
     
-    client_ip = request.client.host
+    client_ip = req.client.host
     country   = country_from_ip(client_ip) or "Unknown"
     city      = city_from_ip(client_ip) or "Unknown"
     
