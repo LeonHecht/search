@@ -5,6 +5,7 @@ from app.config import ENABLE_TRANSFORMERS
 from app.services.transformer import transformer_search
 from app.models.query_log import Session, QueryLog, engine
 from app.services.utils import country_from_ip, city_from_ip
+from fastapi import Request
 
 router = APIRouter()
 
@@ -26,18 +27,18 @@ def ping():
 
 @router.post("/search", response_model=list[SearchResult], summary="Run a BM25 or transformer search")
 
-def search_endpoint(req: SearchRequest = Body(..., description="Your search parameters")) -> list[SearchResult]:
+def search_endpoint(request: Request, req: SearchRequest = Body(..., description="Your search parameters")) -> list[SearchResult]:
     if not req.query.strip():
         raise HTTPException(status_code=400, detail="Query must not be empty")
     
-    client_ip = req.client.host
+    client_ip = request.client.host or "Unknown"
     country   = country_from_ip(client_ip) or "Unknown"
     city      = city_from_ip(client_ip) or "Unknown"
     
     with Session(engine) as sess:
         sess.add(
             QueryLog(
-                client_ip=req.client.host,
+                client_ip=client_ip,
                 country=country,
                 city=city,
                 mode="semantica" if req.use_transformer else "exacta",
