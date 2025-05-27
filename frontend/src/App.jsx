@@ -65,74 +65,79 @@ export default function App() {
 
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100">
-      <div className="w-full max-w-xl bg-gray-100 p-14 rounded-2xl shadow-lg">
-        <h1 className="text-2xl font-bold mb-4 text-center mb-7">Legal Document Search</h1>
-        {/* Toggle between BM25 (Exacta) and Transformer (Semantica) */}
-        <div className="flex justify-center mb-4">
-          <button
-            onClick={() => setUseTransformer(false)}
-            className={`px-4 py-2 rounded-l-2xl border ${!useTransformer ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
-          >
-            Exacta
-          </button>
-          <button
-            onClick={() => setUseTransformer(true)}
-            className={`px-4 py-2 rounded-r-2xl border ${useTransformer ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
-          >
-            Semántica
-          </button>
-        </div>
-        <div className="flex gap-2">
-          <div className={`input-wrapper flex-grow relative ${query ? 'caret-hidden' : ''}`}>
-            <input
-              type="text"
-              className="w-full py-3 px-4 border rounded-2xl focus:outline-none focus:placeholder-transparent hover:bg-gray-50 transition-colors"
-              placeholder="Enter your search query..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="container mx-auto px-4 py-8">
+        <div className="w-full max-w-xl mx-auto bg-gray-100 p-8 md:p-14 rounded-2xl shadow-lg">
+          <h1 className="text-2xl font-bold mb-4 text-center mb-7">Legal Document Search</h1>
+          {/* Toggle between BM25 (Exacta) and Transformer (Semantica) */}
+          <div className="flex justify-center mb-4">
             <button
-              onClick={handleSearch}
-              className="py-1 px-5 bg-slate-600 rounded-3xl hover:bg-slate-500 disabled:opacity-50 transition-colors hover:shadow text-white"
-              disabled={loading}
+              onClick={() => setUseTransformer(false)}
+              className={`px-4 py-2 rounded-l-2xl border hover:shadow transition-colors ${!useTransformer ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
             >
-              {loading ? 'Searching...' : 'Search'}
+              Exacta
             </button>
+            <button
+              onClick={() => setUseTransformer(true)}
+              className={`px-4 py-2 rounded-r-2xl border hover:shadow transition-colors ${useTransformer ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+            >
+              Semántica
+            </button>
+          </div>
+          {/* 3) Make input+button stack on mobile */}
+          <div className="mt-6 flex flex-col sm:flex-row gap-4">
+            <div className={`input-wrapper flex-grow relative ${query ? 'caret-hidden' : ''}`}>
+              <input
+                type="text"
+                className="w-full py-3 px-4 border rounded-2xl
+                            focus:outline-none focus:placeholder-transparent
+                            hover:bg-gray-50 transition-colors"
+                placeholder="Enter your search query..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              />
+            </div>
+              <button
+                onClick={handleSearch}
+                className="flex-shrink-0 px-6 py-2 text-gray-700 bg-gray-200 rounded-3xl hover:bg-gray-100 transition-colors hover:shadow hover:text-gray-800"
+                disabled={loading}
+              >
+                {loading ? 'Searching...' : 'Search'}
+              </button>
+          </div>
+          <ul className="mt-6 space-y-4">
+            {results.map((res) => (
+              <li key={res.id} className="p-4 border rounded-lg hover:shadow">
+                <h2 className="text-lg font-semibold">{res.title}</h2>
+                <div className="flex justify-between items-center mt-1">
+                  <p className="font-mono text-xs text-gray-500">ID: {res.id}</p>
+                  <span className="text-sm font-semibold">
+                    Score: {res.score.toFixed(3)}
+                  </span>
+                </div>
+
+                {/* snippet around match */}
+                <p className="mt-2 text-gray-700 text-sm">
+                  {renderSnippet(res.snippet)}
+                  {res.snippet.split(' ').length >= 50 ? '…' : ''}
+                </p>
+
+                {/* download button, if available */}
+                {res.download_url && (
+                  <a
+                    href={res.download_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-block mt-3 px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-100 transition-colors hover:shadow hover:text-gray-800"
+                  >
+                    Download Full Case
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
         </div>
-        <ul className="mt-6 space-y-4">
-          {results.map((res) => (
-            <li key={res.id} className="p-4 border rounded-lg hover:shadow">
-              <h2 className="text-lg font-semibold">{res.title}</h2>
-              <div className="flex justify-between items-center mt-1">
-                <p className="font-mono text-xs text-gray-500">ID: {res.id}</p>
-                <span className="text-sm font-semibold">
-                  Score: {res.score.toFixed(3)}
-                </span>
-              </div>
-
-              {/* snippet around match */}
-              <p className="mt-2 text-gray-700 text-sm">
-                {renderSnippet(res.snippet)}
-                {res.snippet.split(' ').length >= 50 ? '…' : ''}
-              </p>
-
-              {/* download button, if available */}
-              {res.download_url && (
-                <a
-                  href={res.download_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-block mt-3 px-4 py-2 bg-slate-600 text-white rounded hover:bg-slate-500 text-sm"
-                >
-                  Download Full Case
-                </a>
-              )}
-            </li>
-          ))}
-        </ul>
       </div>
     </div>
   );
