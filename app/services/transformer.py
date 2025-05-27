@@ -112,4 +112,4 @@ def transformer_search(query: str, top_k: int = 30) -> list[dict]:
     return results
 
 # eager load at import
-# load_transformer_corpus()
+load_transformer_corpus()
