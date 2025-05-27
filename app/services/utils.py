@@ -1,8 +1,15 @@
 import geoip2.database
+import os
 
 # point to where you placed the DB file
-_reader_country = geoip2.database.Reader("/opt/GeoLite2-Country.mmdb")
-_reader_city = geoip2.database.Reader("/opt/GeoLite2-City.mmdb")
+if os.getenv("ENV") == "prod":
+    _reader_country = geoip2.database.Reader("/opt/GeoLite2-Country.mmdb")
+    _reader_city = geoip2.database.Reader("/opt/GeoLite2-City.mmdb")
+elif os.getenv("ENV") == "dev":
+    _reader_country = geoip2.database.Reader("./GeoLite2-Country.mmdb")
+    _reader_city = geoip2.database.Reader("./GeoLite2-City.mmdb")
+else:
+    raise RuntimeError("ENV variable must be set to 'prod' or 'dev' to locate GeoIP databases")
 
 def country_from_ip(ip: str) -> str | None:
     try:

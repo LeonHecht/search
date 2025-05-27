@@ -20,3 +20,8 @@ frontend/dist/
 .cache/
 
 .cache
+
+queries.db
+
+GeoLite2-City.mmdb
+GeoLite2-Country.mmdb
