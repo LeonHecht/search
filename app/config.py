@@ -6,6 +6,8 @@ load_dotenv()
 MODE = os.getenv("MODE", "thesis")  # thesis or public
 ENV = os.getenv("ENV", "dev")  # dev or prod
 
+print(f"Running in {MODE} mode, {ENV} environment")
+
 if MODE == "thesis":
     CORPUS_PATH = "data/static_corpus"
     ENABLE_TRANSFORMERS = True
