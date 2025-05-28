@@ -111,10 +111,3 @@ def transformer_search(query: str, top_k: int = 30) -> list[dict]:
         })
 
     return results
-
-# eager load at import
-if os.getenv("ENV") == "prod":
-    # in production, we load the corpus immediately
-    load_transformer_corpus()
-else:
-    pass
