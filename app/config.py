@@ -3,8 +3,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-MODE = os.getenv("MODE", "thesis")  # thesis or public
-ENV = os.getenv("ENV", "dev")  # dev or prod
+MODE = os.getenv("MODE")  # thesis or public
+if MODE not in ["thesis", "public"]:
+    raise RuntimeError("MODE variable must be set to 'thesis' or 'public'")
+ENV = os.getenv("ENV")  # dev or prod
+if ENV not in ["dev", "prod"]:
+    raise RuntimeError("ENV variable must be set to 'dev' or 'prod'")
 
 print(f"Running in {MODE} mode, {ENV} environment")
 
