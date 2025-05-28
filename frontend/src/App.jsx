@@ -5,6 +5,9 @@ export default function App() {
   const [useTransformer, setUseTransformer] = useState(false);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [queryLogId, setQueryLogId] = useState(null);
+  const [feedbackById, setFeedbackById] = useState({});
+  const [toast, setToast] = useState({ docId: null, msg: "" });
 
   const handleSearch = async () => {
     if (!query.trim()) return;
@@ -25,7 +28,9 @@ export default function App() {
 
       const data = await resp.json();
       console.log('Search response:', data);
-      setResults(data);
+      // data has shape { query_log_id, results }
+      setResults(data.results);
+      setQueryLogId(data.query_log_id); // Store query_log_id for feedback
     } catch (err) {
       console.error('Fetch failed:', err);
       const text = await err.response?.text().catch(()=>'');
@@ -63,21 +68,56 @@ export default function App() {
     });
   };
 
+  async function sendFeedback(documentId, positive) {
+    try {
+      // You’ll need to know the query_log_id from when you logged the search.
+      // For simplicity, assume you stored it in state when you first fetched results.
+      const payload = {
+        query_log_id: queryLogId,  
+        document_id: documentId,
+        positive,
+      };
+
+      const resp = await fetch("/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!resp.ok) throw new Error(await resp.text());
+      console.log("Feedback sent:", await resp.json());
+      
+      // mark this doc as liked/disliked
+      setFeedbackById(prev => ({ ...prev, [documentId]: positive }));
+
+      setToast({
+        docId: documentId,
+        msg: positive ? "Gracias por su feedback!" : "Gracias, vamos a mejorar!"
+      });
+
+      setTimeout(() => setToast({ docId: null, msg: "" }), 2000); // clear after 2 seconds
+    
+    } catch (err) {
+      console.error("Feedback error:", err);
+    }
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="container mx-auto px-4 py-8">
         <div className="w-full max-w-xl mx-auto bg-gray-100 p-8 md:p-14 rounded-2xl shadow-lg">
-          <h1 className="text-2xl font-bold mb-4 text-center mb-7">Legal Document Search</h1>
+          <h1 className="text-2xl font-bold mb-4 text-center text-gray-700 mb-7">Legal Document Search</h1>
           {/* Toggle between BM25 (Exacta) and Transformer (Semantica) */}
           <div className="flex justify-center mb-4">
             <button
+              title="Exacta: Búsqueda basada en coincidencia literal de palabras clave (BM25).
+              Las palabras se neutralizan por acentos y se comparan sin distinción de mayúsculas/minúsculas."
               onClick={() => setUseTransformer(false)}
               className={`px-4 py-2 rounded-l-2xl border hover:shadow transition-colors ${!useTransformer ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
             >
               Exacta
             </button>
             <button
+              title="Semántica: Búsqueda con comprensión contextual mediante embeddings (transformer)."
               onClick={() => setUseTransformer(true)}
               className={`px-4 py-2 rounded-r-2xl border hover:shadow transition-colors ${useTransformer ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
             >
@@ -107,35 +147,88 @@ export default function App() {
               </button>
           </div>
           <ul className="mt-6 space-y-4">
-            {results.map((res) => (
-              <li key={res.id} className="p-4 border rounded-lg hover:shadow">
-                <h2 className="text-lg font-semibold">{res.title}</h2>
-                <div className="flex justify-between items-center mt-1">
-                  <p className="font-mono text-xs text-gray-500">ID: {res.id}</p>
-                  <span className="text-sm font-semibold">
-                    Score: {res.score.toFixed(3)}
-                  </span>
-                </div>
+            {results.map((res) => {
+              const fb = feedbackById[res.id];
+              const isToast = toast.docId === res.id;
 
-                {/* snippet around match */}
-                <p className="mt-2 text-gray-700 text-sm">
-                  {renderSnippet(res.snippet)}
-                  {res.snippet.split(' ').length >= 50 ? '…' : ''}
-                </p>
+              return (
+                <li key={res.id} className="p-4 border rounded-lg hover:shadow">
+                  <div className="relative">
+                    <h2 className="text-lg font-semibold">{res.title}</h2>
+                    <div className="flex justify-between items-center mt-1">
+                      <p className="font-mono text-xs text-gray-500">ID: {res.id}</p>
+                      <span className="text-sm font-semibold">
+                        Score: {res.score.toFixed(3)}
+                      </span>
+                    </div>
 
-                {/* download button, if available */}
-                {res.download_url && (
-                  <a
-                    href={res.download_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-block mt-3 px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-100 transition-colors hover:shadow hover:text-gray-800"
-                  >
-                    Download Full Case
-                  </a>
-                )}
-              </li>
-            ))}
+                    {/* snippet around match */}
+                    <p className="mt-2 text-gray-700 text-sm">
+                      {renderSnippet(res.snippet)}
+                      {res.snippet.split(' ').length >= 50 ? '…' : ''}
+                    </p>
+
+                    {/* download button, if available */}
+                    {res.download_url && (
+                      <a
+                        href={res.download_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-block mt-3 px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-100 transition-colors hover:shadow hover:text-gray-800"
+                      >
+                        Download Full Case
+                      </a>
+                    )}
+                    {/* Feedback buttons */}
+                    <div className="absolute bottom-2 right-2 flex space-x-2">
+                      <button
+                        onClick={() => sendFeedback(res.id, true)}
+                        className={`
+                          "p-1 rounded-full transition hover:bg-green-100" +
+                          ${fb === true
+                            ? "bg-green-200 text-green-800"
+                            : "hover:bg-green-100 text-gray-600"
+                          }
+                        `}
+                        title="Like: Este documento es un buen resultado para mi consulta."
+                        disabled={fb != null}
+                      >
+                        👍
+                      </button>
+                      <button
+                        onClick={() => sendFeedback(res.id, false)}
+                        className={`
+                          "p-1 rounded-full transition hover:bg-red-100"
+                        ${fb === false
+                          ? "bg-red-200 text-red-800"
+                          : "hover:bg-red-100 text-gray-600"
+                        }
+                        `}
+                        title="Dislike: Este documento es NO un buen resultado para mi consulta."
+                        disabled={fb != null}
+                      >
+                        👎
+                      </button>
+                    </div>
+                    {isToast && (
+                      <div
+                        className="
+                          absolute 
+                          bottom-10 right-2      /* position above the buttons */
+                          bg-white border border-gray-300
+                          text-gray-800
+                          px-3 py-1
+                          rounded-md shadow-lg
+                          animate-fade-in-out z-10
+                        "
+                      >
+                        {toast.msg}
+                      </div>
+                    )}
+                  </div>
+                </li>
+              )
+            })}
           </ul>
         </div>
       </div>

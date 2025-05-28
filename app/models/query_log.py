@@ -9,8 +9,3 @@ class QueryLog(SQLModel, table=True):
     client_ip: str
     mode: str            # "exacta" or "semantica"
     query: str
-
-# configure your SQLite (or any) engine
-sqlite_url = "sqlite:///./queries.db"
-engine = create_engine(sqlite_url, echo=False)
-SQLModel.metadata.create_all(engine)
