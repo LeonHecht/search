@@ -1,3 +1,6 @@
+# Copyright 2025 Leon Hecht
+# Licensed under the Apache License, Version 2.0 (see LICENSE file)
+
 from sqlmodel import SQLModel, create_engine
 
 # import every model so SQLModel.metadata knows about them

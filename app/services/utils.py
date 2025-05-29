@@ -1,3 +1,6 @@
+# Copyright 2025 Leon Hecht
+# Licensed under the Apache License, Version 2.0 (see LICENSE file)
+
 import geoip2.database
 import os
 from app.config import GEOIP_CITY_DB, GEOIP_COUNTRY_DB

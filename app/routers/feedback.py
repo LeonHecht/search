@@ -1,3 +1,6 @@
+# Copyright 2025 Leon Hecht
+# Licensed under the Apache License, Version 2.0 (see LICENSE file)
+
 from fastapi import APIRouter, HTTPException, Body, Request
 from sqlmodel import Session, select
 from pydantic import BaseModel, Field

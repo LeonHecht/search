@@ -1,3 +1,6 @@
+# Copyright 2025 Leon Hecht
+# Licensed under the Apache License, Version 2.0 (see LICENSE file)
+
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from pathlib import Path
 from app.config import CORPUS_PATH, ENABLE_TRANSFORMERS

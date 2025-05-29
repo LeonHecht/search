@@ -1,3 +1,6 @@
+# Copyright 2025 Leon Hecht
+# Licensed under the Apache License, Version 2.0 (see LICENSE file)
+
 import json
 from pathlib import Path
 from rank_bm25 import BM25Okapi

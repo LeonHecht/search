@@ -1,3 +1,6 @@
+# Copyright 2025 Leon Hecht
+# Licensed under the Apache License, Version 2.0 (see LICENSE file)
+
 from sqlmodel import SQLModel, Field, create_engine, Session
 from datetime import datetime
 
