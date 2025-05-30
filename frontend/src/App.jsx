@@ -13,6 +13,8 @@ export default function App() {
   const [queryLogId, setQueryLogId] = useState(null);
   const [feedbackById, setFeedbackById] = useState({});
   const [toast, setToast] = useState({ docId: null, msg: "" });
+  // Track whether the info panel is open
+  const [infoOpen, setInfoOpen] = useState(false);
 
   const handleSearch = async () => {
     if (!query.trim()) return;
@@ -110,7 +112,43 @@ export default function App() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="container mx-auto px-4 py-8">
         <div className="w-full max-w-xl mx-auto bg-gray-100 p-8 md:p-14 rounded-2xl shadow-lg">
-          <h1 className="text-2xl font-bold mb-4 text-center text-gray-700 mb-7">Legal Document Search</h1>
+          {/* Title + Info toggle */}
+          <h1 className="text-2xl font-bold text-gray-800 text-center">
+            Buscador de Jurisprudencia de la Sala Penal
+          </h1>
+          <button
+            onClick={() => setInfoOpen((o) => !o)}
+            className="mt-4 text-gray-500 hover:text-gray-700 transition"
+            aria-expanded={infoOpen}
+            aria-label="Toggle about panel"
+          >
+            <span className="text-lg">ℹ️ Qué es eso?</span>
+          </button>
+
+          {/* Info accordion */}
+          <div
+            className={`my-4 overflow-hidden transition-max-h duration-300 ${
+              infoOpen ? 'max-h-96' : 'max-h-0'
+            }`}
+          >
+            <p className="text-gray-700 text-sm leading-relaxed">
+              🔍 Esta interfaz te permite buscar <strong>5,000 sentencias</strong> de 2011 a 2023 de la Sala Penal de la Corte Suprema de Justicia de Paraguay. Los documentos tienen los siguientes criterios:
+            </p>
+              <ul className="list-disc list-inside text-gray-700 text-sm mt-2">
+                <li>Materia: <strong>Penal Adolescente</strong></li>
+                <li>Tipo de resolución judicial: <strong>Acuerdos y Sentencias</strong>.</li>
+                <li>Sala: <strong>Cámara Penal</strong>.</li>
+              </ul>
+              <p className="text-gray-700 text-sm leading-relaxed mt-2"><strong>Puedes</strong>:</p>
+            <ul className="list-disc list-inside text-gray-700 text-sm mt-2">
+              <li>Usar búsqueda <strong>Exacta</strong> (BM25) para búsquedas basadas en coincidencia de palabras clave.</li>
+              <li>Usar búsqueda <strong>Semántica</strong> (embeddings de transformer) para encontrar casos con significado semántico similar a la consulta.</li>
+              <li>Escribir cualquier término o frase jurídica (p. ej. <em>“hurto agravado en Villarica”</em>) en el cuadro de búsqueda.</li>
+            </ul>
+            <p className="text-gray-600 text-xs mt-3 italic">
+              💡 Consejo: las tildes se ignoran y las búsquedas no distinguen entre mayúsculas y minúsculas.
+            </p>
+          </div>
           {/* Toggle between BM25 (Exacta) and Transformer (Semantica) */}
           <div className="flex justify-center mb-4">
             <button
@@ -137,7 +175,7 @@ export default function App() {
                 className="w-full py-3 px-4 border rounded-2xl
                             focus:outline-none focus:placeholder-transparent
                             hover:bg-gray-50 transition-colors"
-                placeholder="Enter your search query..."
+                placeholder="Ingresa las palabras de tu búsqueda..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -148,7 +186,7 @@ export default function App() {
                 className="flex-shrink-0 px-6 py-2 text-gray-700 bg-gray-200 rounded-3xl hover:bg-gray-100 transition-colors hover:shadow hover:text-gray-800"
                 disabled={loading}
               >
-                {loading ? 'Searching...' : 'Search'}
+                {loading ? 'Buscando...' : 'Buscar'}
               </button>
           </div>
           <ul className="mt-6 space-y-4">
