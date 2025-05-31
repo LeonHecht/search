@@ -122,7 +122,7 @@ export default function App() {
             aria-expanded={infoOpen}
             aria-label="Toggle about panel"
           >
-            <span className="text-lg">ℹ️ Qué es eso?</span>
+            <span>ℹ️ Guía rápida</span>
           </button>
 
           {/* Info accordion */}
@@ -168,7 +168,7 @@ export default function App() {
             </button>
           </div>
           {/* 3) Make input+button stack on mobile */}
-          <div className="mt-6 flex flex-col sm:flex-row gap-4">
+          <div className="mt-10 flex flex-col sm:flex-row gap-4">
             <div className={`input-wrapper flex-grow relative ${query ? 'caret-hidden' : ''}`}>
               <input
                 type="text"
