@@ -217,6 +217,7 @@ export default function App() {
                         href={res.download_url}
                         target="_blank"
                         rel="noreferrer"
+                        onClick={() => sendFeedback(res.id, true)}
                         className="inline-block mt-3 px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-100 transition-colors hover:shadow hover:text-gray-800"
                       >
                         Download Full Case
