@@ -108,6 +108,10 @@ def bm25_search(query: str, top_k: int = 30) -> list[dict]:
     top_indices = [i for i in top_indices if scores[i] > 0][:top_k]
     
     results = []
+    tokenized_query_cleaned = [tok for tok in tokenized_query if len(tok) > 3]
+    if len(tokenized_query_cleaned) > 0:
+        tokenized_query = tokenized_query_cleaned
+        
     for i in top_indices:
         doc = _CORPUS[i]
         text = doc["text"]

@@ -78,6 +78,10 @@ def transformer_search(query: str, top_k: int = 30) -> list[dict]:
 
     results = []
     tokenized_query = [normalize_token(tok) for tok in q_norm.split()]
+    tokenized_query_cleaned = [tok for tok in tokenized_query if len(tok) > 3]
+    if len(tokenized_query_cleaned) > 0:
+        tokenized_query = tokenized_query_cleaned
+        
     for i in idxs:
         doc = _CORPUS[i]
         text = doc['text']
