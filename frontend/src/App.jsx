@@ -114,7 +114,7 @@ export default function App() {
         <div className="w-full max-w-xl mx-auto bg-gray-100 p-8 md:p-14 rounded-2xl shadow-lg">
           {/* Title + Info toggle */}
           <h1 className="text-2xl font-bold text-gray-800 text-center">
-            Buscador de Jurisprudencia de la Sala Penal
+            Buscador de Jurisprudencia de la Sala Penal (5000 documentos)
           </h1>
           <button
             onClick={() => setInfoOpen((o) => !o)}
@@ -135,9 +135,9 @@ export default function App() {
               🔍 Esta interfaz te permite buscar <strong>5,000 sentencias</strong> de 2011 a 2023 de la Sala Penal de la Corte Suprema de Justicia de Paraguay. Los documentos tienen los siguientes criterios:
             </p>
               <ul className="list-disc list-inside text-gray-700 text-sm mt-2">
-                <li>Materia: <strong>Penal Adolescente</strong></li>
+                <li>Materia: <strong>Penal, Penal Adolescente</strong></li>
                 <li>Tipo de resolución judicial: <strong>Acuerdos y Sentencias</strong>.</li>
-                <li>Sala: <strong>Cámara Penal</strong>.</li>
+                <li>Sala: <strong>Sala Penal</strong>.</li>
               </ul>
               <p className="text-gray-700 text-sm leading-relaxed mt-2"><strong>Puedes</strong>:</p>
             <ul className="list-disc list-inside text-gray-700 text-sm mt-2">
