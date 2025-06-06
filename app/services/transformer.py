@@ -60,7 +60,7 @@ def load_transformer_corpus():
 
         # Compute embeddings in batch
         texts = [doc["text_norm"] for doc in _CORPUS]
-        res = _MODEL.encode(texts, batch_size=8, max_length=1024)
+        res = _MODEL.encode(texts, batch_size=8, max_length=2048)
         _CORPUS_EMBS = np.vstack(res['dense_vecs']).astype('float32')
 
 def transformer_search(query: str, top_k: int = 30) -> list[dict]:
