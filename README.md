@@ -1,5 +1,7 @@
 # Legal Search App
 
+Note: Website available at: http://132.248.51.189/
+
 This repository contains a small search system for legal documents built with **FastAPI** and a **React** front‑end. It indexes a corpus of 5,000 Paraguayan Supreme Court cases and lets users search either by BM25 keyword matching or by semantic transformer embeddings.
 
 ## Features
